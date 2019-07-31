@@ -38,6 +38,8 @@
 
 #include <statsBuilder.h>
 
+#include <dram.h>
+
 namespace Memory {
 
 enum CacheLineState {
@@ -144,6 +146,8 @@ class CacheController : public Controller
 
 		// Cache Access Latency
 		int cacheAccessLatency_;
+
+		Dram *customDRAM;
 
 		// A Queue conatining pending requests for this cache
 		FixStateList<CacheQueueEntry, 128> pendingRequests_;

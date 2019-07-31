@@ -38,7 +38,7 @@
 
 #include <machine.h>
 
-#include <dram.h>
+//#include <dram.h>
 
 /* Remove following comments to debug this file's code
 
@@ -73,7 +73,7 @@ CacheController::CacheController(W8 coreid, const char *name,
     cacheLineBits_ = cacheLines_->get_line_bits();
     cacheAccessLatency_ = cacheLines_->get_access_latency();
 
-    Dram *customDRAM = dramInitializer();
+    customDRAM = dramInitializer();
 
 	cacheLines_->init();
 

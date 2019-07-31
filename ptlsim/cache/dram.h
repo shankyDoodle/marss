@@ -25,12 +25,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+/* This ifdef allows the header to be used from both C and C++. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _DRAM_H_
 #define _DRAM_H_
 
 #include <inttypes.h>
 
-#include "riscv_sim_macros.h"
+//#include "riscv_sim_macros.h"
 
 
 //typedef uint32_t target_ulong;
@@ -129,4 +135,9 @@ void dram_print_config(Dram *d);
 
 int dram_get_latency(Dram *d, target_ulong paddr, MemAccessType type);
 
+#endif
+
+
+#ifdef __cplusplus
+}
 #endif
