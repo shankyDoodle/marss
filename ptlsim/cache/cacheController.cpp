@@ -38,6 +38,8 @@
 
 #include <machine.h>
 
+#include <dram.h>
+
 /* Remove following comments to debug this file's code
 
 #ifdef memdebug
@@ -70,6 +72,8 @@ CacheController::CacheController(W8 coreid, const char *name,
 
     cacheLineBits_ = cacheLines_->get_line_bits();
     cacheAccessLatency_ = cacheLines_->get_access_latency();
+
+    Dram *customDRAM = dramInitializer();
 
 	cacheLines_->init();
 
@@ -547,6 +551,18 @@ bool CacheController::cache_access_cb(void *arg)
         //			hit = true;
 
 		OP_TYPE type = queueEntry->request->get_type();
+
+
+		int customDRAMLatency = 0;
+		target_ulong paddr = queueEntry->request->get_physical_address()
+		if(type == MEMORY_OP_READ || type == MEMORY_OP_WRITE){
+			customDRAMLatency = getCustomDRAMLatency(customDRAM, paddr, CustomRead)
+		} else if(type == MEMORY_OP_UPDATE){
+			customDRAMLatency = getCustomDRAMLatency(customDRAM, paddr, CustomWrite)
+		}
+		printf("Hello shanky your output is: \n %d", customDRAMLatency);
+
+
 		bool kernel_req = queueEntry->request->is_kernel();
 		Signal *signal = NULL;
 		int delay;
