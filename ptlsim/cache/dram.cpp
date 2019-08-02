@@ -274,12 +274,12 @@ int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type) {
     }
 
     if (OUTPUT_FOR_MULTI_LAYER || COMPARE_ALL_OUTPUTS) {
-      int currentLayer = getCurrentLayer(addr, mem_bus_width);
+      int currentLayer = getCurrentLayer(paddr, mem_bus_width);
       multiLayerBusy[currentLayer] += currentLatency;
     }
 
     if (OUTPUT_FOR_MULTI_LAYER_VAULT_ORG || COMPARE_ALL_OUTPUTS) {
-      int currentLayer = getVaultOrgLayer(addr, mem_bus_width);
+      int currentLayer = getVaultOrgLayer(paddr, mem_bus_width);
       vault2dRegionBusy[currentLayer] += currentLatency;
     }
 
