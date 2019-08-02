@@ -69,7 +69,7 @@ Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, 
   Dram *d;
   int i, j, k, remaining_bits;
 
-  d = calloc(1, sizeof(Dram));
+  d = (Dram*)calloc(1, sizeof(Dram));
   assert(d);
   d->dram_size = size;
   d->num_dimms = num_dimms;
@@ -93,12 +93,12 @@ Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, 
                                             DRAM_NUM_RANK_BITS +
                                             d->num_row_bits);
 
-  d->dimm = calloc(d->num_dimms, sizeof(DIMM));
+  d->dimm = (DIMM*)calloc(d->num_dimms, sizeof(DIMM));
   assert(d->dimm);
 
   for (i = 0; i < d->num_dimms; ++i) {
     for (j = 0; j < DRAM_NUM_RANKS; ++j) {
-      d->dimm[i].rank[j].chip.bank = calloc(d->num_banks, sizeof(DramBank));
+      d->dimm[i].rank[j].chip.bank = (DramBank*)calloc(d->num_banks, sizeof(DramBank));
       assert(d->dimm[i].rank[j].chip.bank);
       for (k = 0; k < d->num_banks; ++k) {
         d->dimm[i].rank[j].chip.bank[k].last_accessed_row_id = -1;
