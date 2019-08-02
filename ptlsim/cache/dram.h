@@ -135,6 +135,10 @@ void dram_print_config(Dram *d);
 
 int dram_get_latency(Dram *d, target_ulong paddr, MemAccessType type);
 
+Dram *dramInitializer();
+
+int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type);
+
 #endif
 
 
