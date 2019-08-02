@@ -26,7 +26,7 @@
  * THE SOFTWARE.
  */
 
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 
 #include <assert.h>
 #include <math.h>
@@ -221,6 +221,7 @@ Dram *dramInitializer() {
 
 int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type) {
 
+  int mem_bus_width = 32;
 
   if (SHOW_DRAM_CONFIG) {
     printf("\n\n");
@@ -265,7 +266,7 @@ int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type) {
   int totLatForMultiLayer = 0;
   char *endptr;
 //  while ((read = getline(&line, &len, fp)) != -1) {
-    target_ulong addr = strtoimax(line, &endptr, 2);
+//    target_ulong addr = strtoimax(line, &endptr, 2);
     int currentLatency = dram_get_latency(d, paddr, type);
 
     if (OUTPUT_FOR_SINGLE_LAYER || COMPARE_ALL_OUTPUTS) {
@@ -290,17 +291,17 @@ int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type) {
   int retLat = 0;
   if (OUTPUT_FOR_SINGLE_LAYER || COMPARE_ALL_OUTPUTS) {
     printf("Total Latency for Single-Layer Organisation is: %d\n", totLatForSingleLayer);
-    retLat = totLatForSingleLayer
+    retLat = totLatForSingleLayer;
   }
   if (OUTPUT_FOR_MULTI_LAYER || COMPARE_ALL_OUTPUTS) {
     totLatForMultiLayer = findMaxLatency(multiLayerBusy);
     printf("Total Latency for Multi-Layer Organisation is: %d\n", totLatForMultiLayer);
-    retLat = totLatForMultiLayer
+    retLat = totLatForMultiLayer;
   }
   if (OUTPUT_FOR_MULTI_LAYER_VAULT_ORG || COMPARE_ALL_OUTPUTS) {
     totLatForMultiLayer = findMaxLatency(vault2dRegionBusy);
     printf("Total Latency for Multi-Layer Vault Organisation is: %d\n", totLatForMultiLayer);
-    retLat = totLatForMultiLayer
+    retLat = totLatForMultiLayer;
   }
 
 
