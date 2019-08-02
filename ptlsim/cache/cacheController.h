@@ -249,6 +249,14 @@ class CacheController : public Controller
 			return false;
 		}
 
+		Dram *dramInitializerWrapper() {
+			return dramInitializer();
+		}
+
+		int getCustomDRAMLatencyWrapper(Dram *d, target_ulong paddr, MemAccessType type){
+			return getCustomDRAMLatency(d, paddr, type);
+		}
+
 		void print_map(ostream& os)
 		{
 			os << "Cache-Controller: " << get_name() << endl;

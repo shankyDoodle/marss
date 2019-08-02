@@ -73,7 +73,7 @@ CacheController::CacheController(W8 coreid, const char *name,
     cacheLineBits_ = cacheLines_->get_line_bits();
     cacheAccessLatency_ = cacheLines_->get_access_latency();
 
-    customDRAM = dramInitializer();
+    customDRAM = dramInitializerWrapper();
 
 	cacheLines_->init();
 
@@ -556,9 +556,9 @@ bool CacheController::cache_access_cb(void *arg)
 		int customDRAMLatency = 0;
 		target_ulong paddr = queueEntry->request->get_physical_address();
 		if(type == MEMORY_OP_READ || type == MEMORY_OP_WRITE){
-			customDRAMLatency = getCustomDRAMLatency(customDRAM, paddr, CustomRead);
+			customDRAMLatency = getCustomDRAMLatencyWrapper(customDRAM, paddr, CustomRead);
 		} else if(type == MEMORY_OP_UPDATE){
-			customDRAMLatency = getCustomDRAMLatency(customDRAM, paddr, CustomWrite);
+			customDRAMLatency = getCustomDRAMLatencyWrapper(customDRAM, paddr, CustomWrite);
 		}
 		printf("Hello shanky your output is: \n %d", customDRAMLatency);
 
