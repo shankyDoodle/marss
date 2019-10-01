@@ -39,6 +39,8 @@
 
 #include <machine.h>
 
+#define useCustomDRAM 1 // 0: default impl, 1: use custom dram delay
+
 using namespace Memory;
 using namespace Memory::CoherentCache;
 
@@ -54,6 +56,8 @@ CacheController::CacheController(W8 coreid, const char *name,
 {
     memoryHierarchy_->add_cache_mem_controller(this);
     new_stats = new MESIStats(name, &memoryHierarchy->get_machine());
+
+    customDRAM = dramInitializerWrapper(); // initianlize DRAM
 
     cacheLines_ = get_cachelines(type);
 
@@ -626,77 +630,93 @@ bool CacheController::cache_insert_complete_cb(void *arg)
 
 bool CacheController::cache_access_cb(void *arg)
 {
-    CacheQueueEntry *queueEntry = (CacheQueueEntry*)arg;
-    if(queueEntry->annuled)
-        return true;
-
-    queueEntry->eventFlags[CACHE_ACCESS_EVENT]--;
-    bool kernel_req = queueEntry->request->is_kernel();
-	OP_TYPE type = queueEntry->request->get_type();
-
-    if(cacheLines_->get_port(queueEntry->request)) {
-        bool hit;
-        CacheLine *line	= cacheLines_->probe(queueEntry->request);
-        queueEntry->line = line;
-
-        if(line) hit = true;
-        else hit = false;
-
-        // Testing 100 % L2 Hit
-        // if(type_ == L2_CACHE)
-        // hit = true;
-
-        Signal *signal;
-        int delay;
-        if(hit) {
-            signal = &cacheHit_;
-            delay = cacheAccessLatency_;
-
-			if (!queueEntry->isSnoop) {
-				if(type == MEMORY_OP_READ) {
-					N_STAT_UPDATE(new_stats->cpurequest.count.hit.read.hit, ++,
-							kernel_req);
-				} else if(type == MEMORY_OP_WRITE) {
-					N_STAT_UPDATE(new_stats->cpurequest.count.hit.write.hit, ++,
-							kernel_req);
-				}
-			}
-        } else { // Cache Miss
-            signal = &cacheMiss_;
-            delay = cacheAccessLatency_;
-
-            N_STAT_UPDATE(new_stats->miss_state.cpu, [4]++,
-                    kernel_req);
-
-			if (!queueEntry->isSnoop) {
-				if(type == MEMORY_OP_READ) {
-					N_STAT_UPDATE(new_stats->cpurequest.count.miss.read, ++,
-							kernel_req);
-				} else if(type == MEMORY_OP_WRITE) {
-					N_STAT_UPDATE(new_stats->cpurequest.count.miss.write, ++,
-							kernel_req);
-				}
-			}
-        }
-        marss_add_event(signal, delay,
-                (void*)queueEntry);
-        return true;
-    } else {
-        OP_TYPE type = queueEntry->request->get_type();
-        if(type == MEMORY_OP_READ) {
-            N_STAT_UPDATE(new_stats->cpurequest.stall.read.cache_port, ++,
-                    kernel_req);
-        } else if(type == MEMORY_OP_WRITE) {
-            N_STAT_UPDATE(new_stats->cpurequest.stall.write.cache_port, ++,
-                    kernel_req);
-        }
-    }
-
-    /* No port available yet, retry next cycle */
-    queueEntry->eventFlags[CACHE_ACCESS_EVENT]++;
-    marss_add_event(&cacheAccess_, 1, arg);
-
+  CacheQueueEntry *queueEntry = (CacheQueueEntry *) arg;
+  if (queueEntry->annuled)
     return true;
+
+  queueEntry->eventFlags[CACHE_ACCESS_EVENT]--;
+  bool kernel_req = queueEntry->request->is_kernel();
+  OP_TYPE type = queueEntry->request->get_type();
+
+  if (cacheLines_->get_port(queueEntry->request)) {
+    bool hit;
+    CacheLine *line = cacheLines_->probe(queueEntry->request);
+    queueEntry->line = line;
+
+    if (line) hit = true;
+    else hit = false;
+
+    // Testing 100 % L2 Hit
+    // if(type_ == L2_CACHE)
+    // hit = true;
+
+    Signal *signal;
+    int delay;
+    if (hit) {
+      signal = &cacheHit_;
+      delay = cacheAccessLatency_;
+
+      if (!queueEntry->isSnoop) {
+        if (type == MEMORY_OP_READ) {
+          N_STAT_UPDATE(new_stats->cpurequest.count.hit.read.hit, ++,
+                        kernel_req);
+        } else if (type == MEMORY_OP_WRITE) {
+          N_STAT_UPDATE(new_stats->cpurequest.count.hit.write.hit, ++,
+                        kernel_req);
+        }
+      }
+    } else { // Cache Miss
+      signal = &cacheMiss_;
+      delay = cacheAccessLatency_;
+
+      N_STAT_UPDATE(new_stats->miss_state.cpu,[4]++,
+          kernel_req);
+
+      if (!queueEntry->isSnoop) {
+        if (type == MEMORY_OP_READ) {
+          N_STAT_UPDATE(new_stats->cpurequest.count.miss.read, ++,
+                        kernel_req);
+        } else if (type == MEMORY_OP_WRITE) {
+          N_STAT_UPDATE(new_stats->cpurequest.count.miss.write, ++,
+                        kernel_req);
+        }
+      }
+
+
+      if (useCustomDRAM) {
+        int customDRAMLatency = 0;
+        target_ulong paddr = queueEntry->request->get_physical_address();
+        if (type == MEMORY_OP_READ || type == MEMORY_OP_WRITE) {
+          customDRAMLatency = getCustomDRAMLatencyWrapper(customDRAM, paddr, CustomRead);
+        } else if (type == MEMORY_OP_UPDATE) {
+          customDRAMLatency = getCustomDRAMLatencyWrapper(customDRAM, paddr, CustomWrite);
+        }
+
+        printf("Hello shanky your output is: \n %d", customDRAMLatency);
+        delay = customDRAMLatency;
+      }
+
+
+    }
+    marss_add_event(signal, delay,
+                    (void *) queueEntry);
+    return true;
+  } else {
+    OP_TYPE type = queueEntry->request->get_type();
+    if (type == MEMORY_OP_READ) {
+      N_STAT_UPDATE(new_stats->cpurequest.stall.read.cache_port, ++,
+                    kernel_req);
+    } else if (type == MEMORY_OP_WRITE) {
+      N_STAT_UPDATE(new_stats->cpurequest.stall.write.cache_port, ++,
+                    kernel_req);
+    }
+  }
+
+  /* No port available yet, retry next cycle */
+  queueEntry->eventFlags[CACHE_ACCESS_EVENT]++;
+  marss_add_event(&cacheAccess_, 1, arg);
+
+  return true;
 }
 
 bool CacheController::wait_interconnect_cb(void *arg)
