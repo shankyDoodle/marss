@@ -560,7 +560,6 @@ bool CacheController::cache_access_cb(void *arg)
 		} else if(type == MEMORY_OP_UPDATE){
 			customDRAMLatency = getCustomDRAMLatencyWrapper(customDRAM, paddr, CustomWrite);
 		}
-//		printf("Hello shanky your output is: \n %d", customDRAMLatency);
 
 
 		bool kernel_req = queueEntry->request->is_kernel();
