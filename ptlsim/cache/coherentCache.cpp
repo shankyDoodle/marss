@@ -70,7 +70,7 @@ CacheController::CacheController(W8 coreid, const char *name,
 
     cacheLines_->init();
 
-	printf("hello shanky.");
+//	printf("hello shanky.");
 
     SET_SIGNAL_CB(name, "_Cache_Hit", cacheHit_, &CacheController::cache_hit_cb);
 
@@ -693,7 +693,7 @@ bool CacheController::cache_access_cb(void *arg)
           customDRAMLatency = getCustomDRAMLatencyWrapper(customDRAM, paddr, CustomWrite);
         }
 
-        printf("Hello shanky your output is: \n %d", customDRAMLatency);
+//        printf("Hello shanky your output is: \n %d", customDRAMLatency);
         delay = customDRAMLatency;
       }
 
