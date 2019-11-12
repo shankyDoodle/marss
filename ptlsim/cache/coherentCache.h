@@ -37,6 +37,8 @@
 #include <statsBuilder.h>
 #include <cacheLines.h>
 
+#include <dram.h>
+
 namespace Memory {
 
     namespace CoherentCache {
@@ -166,7 +168,9 @@ namespace Memory {
                 CacheType       type_;
                 CacheLinesBase *cacheLines_;
 
-                // No of bits needed to find Cache Line address
+		Dram *customDRAM;
+
+// No of bits needed to find Cache Line address
                 int cacheLineBits_;
 
                 // Cache Access Latency
@@ -303,6 +307,14 @@ namespace Memory {
                 Controller* get_directory() { return directory_; }
 				Controller* get_lower_cont() { return lowerCont_; }
                 CacheQueueEntry* get_new_queue_entry();
+
+		Dram *dramInitializerWrapper() {
+			return dramInitializer();
+		}
+
+		int getCustomDRAMLatencyWrapper(Dram *d, target_ulong paddr, MemAccessType type){
+			return getCustomDRAMLatency(d, paddr, type);
+		}
 
         };
 

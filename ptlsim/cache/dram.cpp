@@ -300,7 +300,7 @@ int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type) {
   }
   if (OUTPUT_FOR_MULTI_LAYER_VAULT_ORG || COMPARE_ALL_OUTPUTS) {
     totLatForMultiLayer = findMaxLatency(vault2dRegionBusy);
-    printf("Total Latency for Multi-Layer Vault Organisation is: %d\n", totLatForMultiLayer);
+    //printf("Total Latency for Multi-Layer Vault Organisation is: %d\n", totLatForMultiLayer);
     retLat = totLatForMultiLayer;
   }
 
