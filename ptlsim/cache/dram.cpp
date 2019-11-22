@@ -32,9 +32,9 @@ static int row_buffer_miss_latency[]
 #define LAYER_COUNT 8
 #define SHOW_DRAM_CONFIG 0 //{1/0 = Yes/No}
 
-#define OUTPUT_FOR_SINGLE_LAYER 0
+#define OUTPUT_FOR_SINGLE_LAYER 1
 #define OUTPUT_FOR_MULTI_LAYER 0
-#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 1
+#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 0
 #define COMPARE_ALL_OUTPUTS 0
 
 Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, int col_size) {
@@ -262,12 +262,12 @@ int getCustomDRAMLatency(Dram *d, target_ulong paddr, MemAccessType type) {
 
   int retLat = 0;
   if (OUTPUT_FOR_SINGLE_LAYER || COMPARE_ALL_OUTPUTS) {
-    printf("Total Latency for Single-Layer Organisation is: %d\n", totLatForSingleLayer);
+    //printf("Total Latency for Single-Layer Organisation is: %d\n", totLatForSingleLayer);
     retLat = totLatForSingleLayer;
   }
   if (OUTPUT_FOR_MULTI_LAYER || COMPARE_ALL_OUTPUTS) {
     totLatForMultiLayer = findMaxLatency(multiLayerBusy);
-    printf("Total Latency for Multi-Layer Organisation is: %d\n", totLatForMultiLayer);
+    //printf("Total Latency for Multi-Layer Organisation is: %d\n", totLatForMultiLayer);
     retLat = totLatForMultiLayer;
   }
   if (OUTPUT_FOR_MULTI_LAYER_VAULT_ORG || COMPARE_ALL_OUTPUTS) {
