@@ -24,6 +24,7 @@ extern "C" {
 #define DRAM_MEM_BUS_WIDTH 64 /* In bits */
 #define DRAM_BANK_COL_SIZE 8 /* In bits */
 #define SIZE_OF_BYTE 8 /* In bits */
+#define LAYER_COUNT 8
 
 /* CPU cycles required to drive address and data on memory bus(round-trip time) */
 #define MEM_BUS_ACCESS_RTT_LATENCY 45
