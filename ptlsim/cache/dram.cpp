@@ -106,17 +106,102 @@ int dram_get_latency(Dram *d, target_ulong paddr, MemAccessType type) {
                       DRAM_NUM_RANK_BITS + d->num_col_high_bits + d->num_bank_bits + d->num_col_low_bits + d->num_dimm_bits + d->bus_offset_bits,
                       MASK(d->num_row_bits));
 
-  /* Get the bank in which the given paddr is mapped */
-  DramBank *bank = &d->dimm[dimm_idx].rank[rank_idx].chip.bank[bank_idx];
+  if (OUTPUT_FOR_MULTI_LAYER) {
+    int hitInBuffer = 0;
+    for (int i = 0; i < LAYER_COUNT; i++) {
+      if (row_idx == vault2dBuffer[i]) {
+        latency = 45 + (2 * (i+1));
+        hitInBuffer = 1;
+        break;
+      }
+    }
+    if (hitInBuffer == 0) {
+      latency = 90;
+      int emptySPaceFound = 0;
+      for (int i = 0; i < LAYER_COUNT; i++) {
+        if (vault2dBuffer[i] == -1) {
+          vault2dBuffer[i] = row_idx;
+          emptySPaceFound = 1;
+          lastStoredIndexValue2dBuffer = i;
+          break;
+        }
+      }
+      if (!emptySPaceFound) {
+        if(lastStoredIndexValue2dBuffer >= LAYER_COUNT-1){
+          lastStoredIndexValue2dBuffer = 0;
+        }
+        vault2dBuffer[lastStoredIndexValue2dBuffer] = row_idx;
+      }
+    }
 
-  /* Check if DRAM page is already open in the row-buffer */
-  if (bank->last_accessed_row_id == row_idx) {
-    /* Row buffer hit (open-page) */
-    latency = row_buffer_hit_latency[type];
-  } else {
-    /* Row buffer miss */
-    latency = row_buffer_miss_latency[type];
-    bank->last_accessed_row_id = row_idx;
+    if(!COMPARE_ALL_OUTPUTS){
+      return latency;
+    }
+  }
+
+  if (OUTPUT_FOR_MULTI_LAYER_VAULT_ORG) {
+    int hitInBuffer = 0;
+
+    for (int i = 0; i < LAYER_COUNT; i++) {
+      for (int j = 0; j < LAYER_COUNT; j++) {
+        if (row_idx == vaultBuffer[i][j]) {
+          latency = 45 + (2*(i+1));
+          hitInBuffer = 1;
+          break;
+        }
+      }
+    }
+    if (hitInBuffer == 0) {
+      latency = 90;
+      int emptySPaceFound = 0;
+      for (int i = 0; i < LAYER_COUNT; i++) {
+        for (int j = 0; j < LAYER_COUNT; j++) {
+          if (vaultBuffer[i][j] == -1) {
+            vaultBuffer[i][j] = row_idx;
+            emptySPaceFound = 1;
+            lastStoredIndexValueBufferI = i;
+            lastStoredIndexValueBufferJ = j;
+            break;
+          }
+        }
+      }
+      if (!emptySPaceFound) {
+        if (lastStoredIndexValueBufferI < LAYER_COUNT-2 && lastStoredIndexValueBufferJ < LAYER_COUNT-2){
+          lastStoredIndexValueBufferI++;
+          lastStoredIndexValueBufferJ++;
+        } else if(lastStoredIndexValueBufferJ >= LAYER_COUNT-1){
+          lastStoredIndexValueBufferJ = 0;
+          if(lastStoredIndexValueBufferI  == LAYER_COUNT-1){
+            lastStoredIndexValueBufferI = 0;
+          }else{
+            lastStoredIndexValueBufferI++;
+          }
+        } else if(lastStoredIndexValueBufferI == LAYER_COUNT-1 && lastStoredIndexValueBufferJ == LAYER_COUNT-1){
+          lastStoredIndexValueBufferI = 0;
+          lastStoredIndexValueBufferJ = 0;
+        }
+        vaultBuffer[lastStoredIndexValueBufferI][lastStoredIndexValueBufferJ] = row_idx;
+
+      }
+    }
+    if(!COMPARE_ALL_OUTPUTS){
+      return latency;
+    }
+  }
+
+  if(OUTPUT_FOR_SINGLE_LAYER){
+    /* Get the bank in which the given paddr is mapped */
+    DramBank *bank = &d->dimm[dimm_idx].rank[rank_idx].chip.bank[bank_idx];
+
+    /* Check if DRAM page is already open in the row-buffer */
+    if (bank->last_accessed_row_id == row_idx) {
+      /* Row buffer hit (open-page) */
+      latency = row_buffer_hit_latency[type];
+    } else {
+      /* Row buffer miss */
+      latency = row_buffer_miss_latency[type];
+      bank->last_accessed_row_id = row_idx;
+    }
   }
 
   return latency;
