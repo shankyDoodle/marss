@@ -1,5 +1,5 @@
 # Sample Marss simconfig file
--machine single_core
+-machine ivybridge
 
 # Logging options
 -logfile 62log.log
