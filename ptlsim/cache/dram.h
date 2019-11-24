@@ -67,11 +67,7 @@ typedef struct DramBank {
     int last_accessed_row_id;
 } DramBank;
 
-int vaultBuffer[LAYER_COUNT][LAYER_COUNT];
-int vault2dBuffer[LAYER_COUNT];
-int lastStoredIndexValue2dBuffer = 0;
-int lastStoredIndexValueBufferI = 0;
-int lastStoredIndexValueBufferJ = 0;
+
 
 typedef struct DramChip {
     DramBank *bank;

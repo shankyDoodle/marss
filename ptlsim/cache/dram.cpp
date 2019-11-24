@@ -37,6 +37,12 @@ static int row_buffer_miss_latency[]
 #define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 1
 #define COMPARE_ALL_OUTPUTS 0
 
+int vaultBuffer[LAYER_COUNT][LAYER_COUNT];
+int vault2dBuffer[LAYER_COUNT];
+int lastStoredIndexValue2dBuffer = 0;
+int lastStoredIndexValueBufferI = 0;
+int lastStoredIndexValueBufferJ = 0;
+
 Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, int col_size) {
   Dram *d;
   int i, j, k, remaining_bits;
