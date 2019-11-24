@@ -26,16 +26,16 @@ extern "C" {
 #define SIZE_OF_BYTE 8 /* In bits */
 
 /* CPU cycles required to drive address and data on memory bus(round-trip time) */
-#define MEM_BUS_ACCESS_RTT_LATENCY 2
+#define MEM_BUS_ACCESS_RTT_LATENCY 45
 
 /* CPU cycles required to read a DRAM row into the row buffer */
-#define ROW_READ_LATENCY 4
+#define ROW_READ_LATENCY 90
 
 /* CPU cycles required to write contents of row buffer into the respective DRAM row */
-#define ROW_WRITE_LATENCY 4
+#define ROW_WRITE_LATENCY 90
 
 /* CPU cycles required to read data from row buffer */
-#define ROW_BUFFER_READ_LATENCY 1
+#define ROW_BUFFER_READ_LATENCY 45
 
 /* CPU cycles required to send the data to CPU on a row buffer hit */
 #define ROW_BUFFER_READ_HIT_LATENCY (MEM_BUS_ACCESS_RTT_LATENCY + ROW_BUFFER_READ_LATENCY)

@@ -1,0 +1,12 @@
+# Sample Marss simconfig file
+-machine private_L2
+
+# Logging options
+-logfile privateL2.log
+-loglevel 1
+
+# Start logging after 10million cycles
+-startlog 10m
+
+# Stats file
+-stats privateL2.stats

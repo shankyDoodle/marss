@@ -2,11 +2,11 @@
 -machine single_core
 
 # Logging options
--logfile 66sim.log
+-logfile 66log.log
 -loglevel 1
 
 # Start logging after 10million cycles
 -startlog 10m
 
 # Stats file
--stats 66sim.stats
+-stats 66log.stats

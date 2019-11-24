@@ -32,9 +32,9 @@ static int row_buffer_miss_latency[]
 #define LAYER_COUNT 8
 #define SHOW_DRAM_CONFIG 0 //{1/0 = Yes/No}
 
-#define OUTPUT_FOR_SINGLE_LAYER 1
+#define OUTPUT_FOR_SINGLE_LAYER 0
 #define OUTPUT_FOR_MULTI_LAYER 0
-#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 0
+#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 1
 #define COMPARE_ALL_OUTPUTS 0
 
 Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, int col_size) {
