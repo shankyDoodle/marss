@@ -62,6 +62,6 @@ namespace Memory{
 	const int MEM_BANKS = 64;
 
 	/* Average wait dealy for retrying (general) */
-	const int AVG_WAIT_DELAY = 5;
+	const int AVG_WAIT_DELAY = 12;
 }
 #endif // CACHECONSTANTS_H
