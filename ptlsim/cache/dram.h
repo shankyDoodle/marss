@@ -84,6 +84,11 @@ typedef struct DualInLineMemoryModule {
     Rank rank[DRAM_NUM_RANKS];
 } DIMM;
 
+typedef struct MeshTiles{
+    int lastSavedX;
+    int lastSavedY;
+} MTPos;
+
 typedef struct Dram {
     uint64_t dram_size;         /* DRAM size in bytes */
     int num_paddr_bits;         /* Number of bits in physical address */
@@ -99,6 +104,7 @@ typedef struct Dram {
     int mem_bus_width_bytes;    /* Size of memory bus in bytes */
     int bus_offset_bits;        /* Number of bits to access a byte within memory bus */
     DIMM *dimm;
+    MTPos *mtPos;
 } Dram;
 
 Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width,

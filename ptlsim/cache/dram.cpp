@@ -31,10 +31,12 @@ static int row_buffer_miss_latency[]
 
 #define LAYER_COUNT 8
 #define SHOW_DRAM_CONFIG 0 //{1/0 = Yes/No}
+#define TILES_COUNT 4
 
 #define OUTPUT_FOR_SINGLE_LAYER 0
 #define OUTPUT_FOR_MULTI_LAYER 0
-#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 1
+#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 0
+#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG_WITH_MULTI_TILES 1
 #define COMPARE_ALL_OUTPUTS 0
 
 int vaultBuffer[LAYER_COUNT][LAYER_COUNT];
@@ -42,6 +44,7 @@ int vault2dBuffer[LAYER_COUNT];
 int lastStoredIndexValue2dBuffer = 0;
 int lastStoredIndexValueBufferI = 0;
 int lastStoredIndexValueBufferJ = 0;
+int tileNumber = 0;
 
 Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, int col_size) {
   Dram *d;
@@ -83,6 +86,10 @@ Dram *dram_init(uint64_t size, int num_dimms, int num_banks, int mem_bus_width, 
       }
     }
   }
+
+//  d->mtPos = (MTPos)calloc(TILES_COUNT, sizeof(MTPos));
+//  assert(d->mtPos);
+  d->mtPos = new MTPos[TILES_COUNT];
 
   return d;
 }
@@ -156,7 +163,11 @@ int dram_get_latency(Dram *d, target_ulong paddr, MemAccessType type) {
           break;
         }
       }
+      if(hitInBuffer){
+        break;
+      }
     }
+
     if (hitInBuffer == 0) {
       latency = 90;
       int emptySPaceFound = 0;
@@ -170,7 +181,11 @@ int dram_get_latency(Dram *d, target_ulong paddr, MemAccessType type) {
             break;
           }
         }
+        if(emptySPaceFound){
+          break;
+        }
       }
+
       if (!emptySPaceFound) {
         if (lastStoredIndexValueBufferI < LAYER_COUNT-2 && lastStoredIndexValueBufferJ < LAYER_COUNT-2){
           lastStoredIndexValueBufferI++;
@@ -192,6 +207,82 @@ int dram_get_latency(Dram *d, target_ulong paddr, MemAccessType type) {
     }
     if(!COMPARE_ALL_OUTPUTS){
       return latency;
+    }
+  }
+
+
+  if (OUTPUT_FOR_MULTI_LAYER_VAULT_ORG_WITH_MULTI_TILES) {
+
+    int hitInBuffer = 0;
+
+    int tileInUse = tileNumber%TILES_COUNT;
+    tileNumber++;
+    if(tileNumber >= TILES_COUNT){
+      tileNumber = 0;
+    }
+
+
+
+    for (int i = 0; i < LAYER_COUNT; i++) {
+      for (int j = 0; j < LAYER_COUNT; j++) {
+        if (row_idx == vaultBuffer[i][j]) {
+          latency = 45 + (2*(i+1));
+          hitInBuffer = 1;
+          break;
+        }
+      }
+      if(hitInBuffer){
+        break;
+      }
+    }
+
+    if (hitInBuffer == 0) {
+      latency = 90;
+      int emptySPaceFound = 0;
+      for (int i = 0; i < LAYER_COUNT; i++) {
+        for (int j = 0; j < LAYER_COUNT; j++) {
+          if (vaultBuffer[i][j] == -1) {
+            vaultBuffer[i][j] = row_idx;
+            emptySPaceFound = 1;
+//            lastStoredIndexValueBufferI = i;
+//            lastStoredIndexValueBufferJ = j;
+            d->mtPos[tileInUse].lastSavedX = i;
+            d->mtPos[tileInUse].lastSavedY = j;
+            break;
+          }
+        }
+        if(emptySPaceFound){
+          break;
+        }
+      }
+
+      if (!emptySPaceFound) {
+        lastStoredIndexValueBufferI = d->mtPos[tileInUse].lastSavedX;
+        lastStoredIndexValueBufferJ = d->mtPos[tileInUse].lastSavedY ;
+
+        if (lastStoredIndexValueBufferI < LAYER_COUNT-2 && lastStoredIndexValueBufferJ < LAYER_COUNT-2){
+          lastStoredIndexValueBufferI++;
+          lastStoredIndexValueBufferJ++;
+        } else if(lastStoredIndexValueBufferJ >= LAYER_COUNT-1){
+          lastStoredIndexValueBufferJ = 0;
+          if(lastStoredIndexValueBufferI  == LAYER_COUNT-1){
+            lastStoredIndexValueBufferI = 0;
+          }else{
+            lastStoredIndexValueBufferI++;
+          }
+        } else if(lastStoredIndexValueBufferI == LAYER_COUNT-1 && lastStoredIndexValueBufferJ == LAYER_COUNT-1){
+          lastStoredIndexValueBufferI = 0;
+          lastStoredIndexValueBufferJ = 0;
+        }
+        vaultBuffer[lastStoredIndexValueBufferI][lastStoredIndexValueBufferJ] = row_idx;
+
+      }
+    }
+
+    int additionalLatency = 4+(2*tileInUse);
+
+    if(!COMPARE_ALL_OUTPUTS){
+      return latency + additionalLatency;
     }
   }
 
