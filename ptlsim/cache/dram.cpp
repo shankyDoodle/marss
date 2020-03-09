@@ -32,9 +32,9 @@ static int row_buffer_miss_latency[]
 #define LAYER_COUNT 8
 #define SHOW_DRAM_CONFIG 0 //{1/0 = Yes/No}
 
-#define OUTPUT_FOR_SINGLE_LAYER 0
+#define OUTPUT_FOR_SINGLE_LAYER 1
 #define OUTPUT_FOR_MULTI_LAYER 0
-#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 1
+#define OUTPUT_FOR_MULTI_LAYER_VAULT_ORG 0
 #define COMPARE_ALL_OUTPUTS 0
 
 int vaultBuffer[LAYER_COUNT][LAYER_COUNT];
